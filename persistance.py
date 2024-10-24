@@ -2,7 +2,7 @@ import os
 
 from flask import jsonify
 from tinydb import TinyDB, Query
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple, Optional
 import datetime
 
 
@@ -114,8 +114,84 @@ class LogsDatabase(Database):
 		entries = self._tinyDatabase.all()
 
 		# Deserialize all logs
-		#return entries
+		# return entries
 		return [_deserialize_log(entry) for entry in entries]
 
 	def remove_by_id(self, id: int):
 		return self._tinyDatabase.remove(doc_ids=[id])
+
+	# new methods:
+	def get(self, id: int) -> Tuple[bool, Optional[Dict[str, Any]]]:
+		"""
+		Retrieve an item from the TinyDB database using its document ID.
+
+		This method queries the TinyDB instance for an entry with the specified
+		document ID (doc_id). If the entry is found, it returns a tuple containing
+		a success flag (True) and the item's data as a dictionary. If no entry is
+		found, it returns a tuple with a failure flag (False) and None.
+
+		:param id: The document ID of the item to retrieve. This should be an integer
+				   representing the unique identifier assigned by TinyDB upon insertion.
+
+		:return: A tuple where the first element is a boolean indicating the success
+				 of the retrieval operation. The second element is either a dictionary
+				 containing the item data if found, or None if no item exists with the
+				 given ID. The dictionary will have key-value pairs corresponding to
+				 the attributes of the stored item.
+		"""
+
+		query_response = self._tinyDatabase.get(doc_id=id)
+
+		if query_response is None:
+			return False, None
+
+		return True, query_response
+
+	def update(self, id: int, data) -> bool:
+		"""
+		Update an item in the TinyDB database using its document ID.
+
+		This method modifies an existing entry in the TinyDB database. It finds the
+		entry with the specified document ID and updates it with the provided data.
+		The method returns a boolean indicating whether the update was successful.
+
+		:param id: The document ID of the item to update. This should be an integer
+				   representing the unique identifier assigned by TinyDB upon insertion.
+
+		:param data: A dictionary containing the new values for the item's fields.
+					 This can include one or more fields of the item to be updated,
+					 and any field not included will remain unchanged.
+
+		:return: A boolean value indicating the success of the update operation.
+				 It returns True if the item was successfully updated (i.e., if the
+				 item with the specified ID exists and has been modified), or False
+				 if the item does not exist or if no changes were made.
+		"""
+
+		query_response: list[int] = self._tinyDatabase.update(data, doc_ids=[id])
+
+		return len(query_response) > 0
+
+	def delete(self, id: int) -> bool:
+		"""
+		Remove a document from TinyDB by a condition matching the doc_id.
+
+		:param doc_id: The unique document ID in TinyDB.
+		:return: True if the document was successfully deleted, False otherwise.
+		"""
+
+		try:
+			# Check if the item exists
+			if self._tinyDatabase.contains(doc_id=id):
+				query_response = self._tinyDatabase.remove(doc_ids=[id])
+				return len(query_response) > 0  # True if deletion was successful
+			else:
+				print(f"Item with doc_id {id} does not exist.")
+				return False
+		except Exception as e:
+			print(f"Error while deleting doc_id {id}: {e}")
+			return False
+
+
+test = LogsDatabase("running_logs.json")
+test.delete(6)
