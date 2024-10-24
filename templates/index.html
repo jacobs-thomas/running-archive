@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/dropdown.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body style="width: 45%; min-width: 400px; justify-context: center; display: flexbox;">
+    <div class="navbar">
+        <a href="#"><h3>About Us</h3></a>
+        <h1>Run Archive</h1>
+        <a href="#"><h3>Contact Us</h3></a>
+    </div>
+
+    <!-- Dropdown Trigger Button -->
+    <div class="dropdown-container">
+        <button id="dropdown-btn" class="dropdown-btn">Add New Log</button>
+
+        <!-- Dropdown Form (initially hidden) -->
+        <div id="dropdown-content" class="dropdown-content">
+            <form id="log-form">
+                <label for="log-title">Title</label>
+                <input type="text" id="log-title" name="title" placeholder="Log title" required>
+
+                <label for="log-date">Date</label>
+                <input type="date" id="log-date" name="date" required>
+
+                <label for="log-time">Time</label>
+                <input type="time" id="log-time" name="time" required>
+
+                <label for="log-notes">Notes</label>
+                <textarea id="log-notes" name="notes" placeholder="Additional notes" rows="3"></textarea>
+
+                <button type="submit" class="submit-btn">Add Log</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="log-rows" id="log-container">
+
+        {% for log in logs %}
+
+        <div class="log" id="log-{{log.doc_id}}">
+            <div class="log-header">
+                <div class="log-details">
+                    <p>{{log.date.strftime('%Y-%m-%d')}} - {{log.date.strftime('%H:%M:%S')}}</p>
+                    <h2>{{log.title}}</h2>
+                </div>
+
+                <div class="log-actions">
+                    <button id="edit-button" class="action-button" aria-label="Edit entry">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button id="delete-button" class="action-button" aria-label="Delete entry", onclick="deleteLog({{log.doc_id}})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="notes-container" id="message">{{log.notes}}</p>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts/delete.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/dropdown.js') }}"></script>
+</body>
+</html>

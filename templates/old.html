@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Running Logs</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1 class="center-align">Running Logs</h1>
+        <table class="striped responsive-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Distance (km)</th>
+                    <th>Notes</th>
+                    <th>Actions</th>  <!-- Column for edit/delete icons -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr id="log-{{ log.doc_id }}">
+                    <td>{{ log.doc_id }}</td>   <!-- For the purposes of development -->
+                    <td>{{ log.date.strftime('%Y-%m-%d') }}</td>  <!-- Format datetime -->
+                    <td>{{ log.date.strftime('%H:%M:%S') }}</td>
+                    <td>{{ log.distance }}</td>
+                    <td>{{ log.notes }}</td>
+                    <td>
+                        <!-- Edit and Delete Icons -->
+                        <a href="#edit-modal" class="modal-trigger" data-id="{{ log.doc_id }}" data-date="{{ log.date }}" data-distance="{{ log.distance }}" data-time="{{ log.time }}" data-notes="{{ log.notes }}">
+                            <i class="material-icons">edit</i>
+                        </a>
+                        <a href="#delete-modal" class="modal-trigger" data-id="{{ log.doc_id }}">
+                            <i class="material-icons">delete</i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h4>Edit Log</h4>
+            <form id="edit-form">
+                <div class="input-field">
+                    <input type="date" id="edit-date" required>
+                    <label for="edit-date">Date</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="edit-time" required>
+                    <label for="edit-time">Time (HH:MM:SS)</label>
+                </div>
+                <div class="input-field">
+                    <input type="number" id="edit-distance" required>
+                    <label for="edit-distance">Distance (km)</label>
+                </div>
+                <div class="input-field">
+                    <textarea id="edit-notes" class="materialize-textarea"></textarea>
+                    <label for="edit-notes">Notes</label>
+                </div>
+                <input type="hidden" id="edit-id">
+                <button type="submit" class="modal-close waves-effect waves-green btn">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <h4>Confirm Deletion</h4>
+            <p>Are you sure you want to delete this log?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn-flat" id="confirm-delete">Yes, Delete</button>
+            <button class="modal-close waves-effect waves-green btn-flat">Cancel</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        // Initialize Materialize modals
+        document.addEventListener('DOMContentLoaded', function() {
+            var modals = document.querySelectorAll('.modal');
+            M.Modal.init(modals);
+        });
+
+        // Open Edit Modal and Populate Fields
+        document.querySelectorAll('a.modal-trigger').forEach(function(element) {
+            element.addEventListener('click', function(event) {
+                var modalType = element.getAttribute('href');
+                
+                if (modalType === '#edit-modal') {
+                    var logId = element.getAttribute('data-id');
+                    var logDate = element.getAttribute('data-date');
+                    var logDistance = element.getAttribute('data-distance');
+                    var logTime = element.getAttribute('data-time');
+                    var logNotes = element.getAttribute('data-notes');
+                    
+                    // Populate the fields in the Edit modal
+                    document.getElementById('edit-id').value = logId;
+                    document.getElementById('edit-date').value = logDate;
+                    document.getElementById('edit-distance').value = logDistance;
+                    document.getElementById('edit-time').value = logTime;
+                    document.getElementById('edit-notes').value = logNotes;
+                    
+                    M.updateTextFields();  // Re-initialize Materialize labels
+                }
+
+                if (modalType === '#delete-modal') {
+                    var deleteId = element.getAttribute('data-id');
+                    document.getElementById('confirm-delete').setAttribute('data-id', deleteId);
+                }
+            });
+        });
+
+        // Handle Delete Confirmation
+        document.getElementById('confirm-delete').addEventListener('click', function() {
+            var logId = this.getAttribute('data-id');
+            // Send request to the server to delete log with logId
+            fetch(`/delete_log/${logId}`, { method: 'DELETE' })
+        });
+
+        // Handle Edit Form Submission
+        document.getElementById('edit-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var logId = document.getElementById('edit-id').value;
+            var updatedData = {
+                date: document.getElementById('edit-date').value,
+                distance: document.getElementById('edit-distance').value,
+                time: document.getElementById('edit-time').value,
+                notes: document.getElementById('edit-notes').value
+            };
+            // Send request to the server to update log with logId
+            // Example: fetch(`/edit_log/${logId}`, { method: 'POST', body: JSON.stringify(updatedData) })
+        });
+
+        // Refresh the rows...
+        document.querySelectorAll('.modal-trigger').forEach(deleteBtn => {
+            deleteBtn.addEventListener('click', function () {
+                var logId = this.getAttribute('data-id');
+
+                fetch(`/delete_log/${logId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log('Log deleted successfully');
+                        // Remove the row from the table
+                        var row = document.getElementById(`log-${logId}`);
+                        if (row) {
+                            row.remove();  // Remove the row from the DOM
+                        }
+                    } else {
+                        console.error('Error deleting log:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</body>
+</html>

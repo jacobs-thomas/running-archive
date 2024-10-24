@@ -1,0 +1,133 @@
+@import url('style.css');
+
+.log {
+    border-width: var(--border-width);
+    border-color: var(--border-colour);
+    border-style: solid;
+    border-radius: var(--border-radius);
+
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.navbar {
+    border-width: var(--border-width);
+    border-color: var(--border-colour);
+    border-style: solid;
+    border-radius: var(--border-radius);
+
+    margin-bottom: 10px;
+    margin-top: 10px;
+
+    display: flex;
+    justify-content: space-around; /* Or use space-between/space-evenly for different spacing */
+    align-items: center; /* Center vertically */
+}
+
+.navbar a {
+    color: black;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: blue;
+    text-decoration: underline;
+}
+
+.navbar > * {
+    flex-grow: 1; /* Make each child take an equal amount of space */
+    text-align: center; /* Center the content inside each child */
+  }
+
+.log-rows {
+    max-height: 400px;
+    overflow-y: scroll;
+    overflow-x: visible;
+    scrollbar-color: rgb(255, 255, 255) rgb(0, 0, 0);
+
+    overflow:scroll;
+}
+
+p.notes-container {
+    word-wrap: break-word;
+}
+
+.log-heading {
+    line-height: 4px;
+
+    border-bottom: 2px solid black;
+}
+
+.log-heading h2 {
+    font-size: 1.0rem;
+}
+
+.log-heading p {
+    font-size: 0.75rem;
+}
+
+#edit-button {
+    border: 2px solid black;
+    background-color: white;
+    width: 40%;
+}
+
+#delete-button {
+    border: 2px solid black;
+    background-color: white;
+    width: 40%;
+}
+
+#delete-button:hover {
+    background-color: var(--delete-colour);
+}
+
+#edit-button:hover {
+    background-color: var(--edit-colour);
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    padding: 8px 8px;
+    margin-left: 4px; /* Space between buttons */
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.action-button i {
+    margin-right: 0px; /* Spacing between icon and text */
+}
+
+/* Flexbox layout for header to space between title and actions */
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically center content */
+    border-bottom: var(--border-colour) var(--border-width) solid;
+
+    padding-bottom: 4px;
+}
+
+
+/* Spacing and alignment for the date and title */
+.log-details p {
+    margin: 0;
+    font-size: 14px;
+    color: #555; /* Softer color for the date */
+}
+
+.log-details h2 {
+    margin: 5px 0 0 0;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Buttons styling with icons */
+.log-actions {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+}
