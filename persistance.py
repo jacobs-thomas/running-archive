@@ -6,6 +6,59 @@ from typing import List, Dict, Any, Tuple, Optional
 import datetime
 
 
+class Event:
+	# Initializer:
+	def __init__(self, name: str, date: datetime, description: str):
+		# Instance attributes:
+		self.name: str = name
+		self.description: str = description
+		self.__date: datetime = date
+
+	# Properties:
+	@property
+	def date(self) -> str:
+		return self.__date.isoformat()
+
+	@date.setter
+	def date(self, value: datetime) -> None:
+		self.__date = value
+
+	def set_date_time(self, date: str, time: str) -> None:
+		"""
+		Sets the date and time from separate date and time strings.
+		Combines them into an ISO format datetime string.
+
+		:param date: Date string in 'YYYY-MM-DD' format.
+		:param time: Time string in 'HH:MM' format.
+		:return: None
+		"""
+		try:
+			# Combine date and time into ISO format
+			combined_str = f"{date}T{time}"
+
+			# Parse the combined string into a datetime object
+			dt = datetime.strptime(combined_str, '%Y-%m-%dT%H:%M')
+
+			# Store the datetime object
+			self.__date = dt
+		except ValueError as e:
+			# Log or handle the error appropriately
+			print(f"Error setting date and time: {e}")
+			return
+
+	def to_dictionary(self) -> Dict[str, str]:
+		"""
+		Converts the Event object into a dictionary format.
+
+		:return: Dictionary representation of the event.
+		"""
+		return {
+			"title": self.name,
+			"date": self.__date.isoformat(),
+			"notes": self.description
+		}
+
+
 class Database:
 	# Constructor:
 	def __init__(self, filename: str) -> None:
@@ -194,4 +247,4 @@ class LogsDatabase(Database):
 
 
 test = LogsDatabase("running_logs.json")
-test.delete(6)
+test.get(5)
