@@ -71,6 +71,14 @@ class Event:
 			"notes": self.description
 		}
 
+	def to_dictionary_with_id(self) -> Dict[str, str]:
+		return {
+			"id": self.id,
+			"title": self.name,
+			"date": self.__date.isoformat(),
+			"notes": self.description
+		}
+
 
 class Database:
 	# Constructor:
@@ -187,13 +195,14 @@ class LogsDatabase(Database):
 		return self._tinyDatabase.remove(doc_ids=[id])
 
 	# new methods:
-	def get_all(self) -> List[Event]:
+	def get_all(self) -> Tuple[bool, Optional[List[Event]]]:
 		try:
 			events = self._tinyDatabase.all()
-			return [Event(event.doc_id, event.get("title"), event.get("date"), event.get("notes")) for event in events]
+			return True, [Event(event.doc_id, event.get("title"), event.get("date"), event.get("notes")) for event in events]
 
 		except Exception as exception:
 			logging.exception(exception)
+			return False, None
 
 	def get(self, id: int) -> Tuple[bool, Optional[Event]]:
 
@@ -232,12 +241,3 @@ class LogsDatabase(Database):
 		except Exception as exception:
 			logging.exception(exception)
 			return False
-
-
-test = LogsDatabase("running_logs.json")
-result, event_object = test.get(5)
-all = test.get_all()
-
-if result:
-	event_object.name = "Ipswich parkrun"
-	test.update(event_object)

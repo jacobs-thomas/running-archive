@@ -39,30 +39,8 @@
     </div>
 
     <div class="log-rows" id="log-container">
-
-        {% for log in logs %}
-
-        <div class="log" id="log-{{log.doc_id}}">
-            <div class="log-header">
-                <div class="log-details">
-                    <p>{{log.date.strftime('%Y-%m-%d')}} - {{log.date.strftime('%H:%M:%S')}}</p>
-                    <h2>{{log.title}}</h2>
-                </div>
-
-                <div class="log-actions">
-                    <button id="edit-button" class="action-button" aria-label="Edit entry" onclick="openEditModal({{log.doc_id}})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button id="delete-button" class="action-button" aria-label="Delete entry", onclick="deleteLog({{log.doc_id}})">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-            </div>
-            <p class="notes-container" id="message">{{log.notes}}</p>
-        </div>
-
-        {% endfor %}
-
+        <!-- Your JavaScript file (make sure this runs after the DOM is loaded) -->
+        <script src="{{ url_for('static', filename='scripts/get_logs.js') }}"></script>
     </div>
 
     <!-- Edit Modal -->

@@ -20,16 +20,22 @@ app = Flask(__name__)
 @app.route('/')
 # ‘/’ URL is bound with hello_world() function.
 def hello_world():
-	logs = database.all()  # Retrieve all logs from TinyDB
-	logs_with_ids = [{"doc_id": log.doc_id, **log} for log in logs]  # Add doc_id to each log
-	return render_template("index.html", logs=logs_with_ids)
+	successful, events = database.get_all()  # Retrieve all logs from TinyDB
+	if not successful:
+		return render_template("index.html", events=[])
+
+	event_dictionaries = [event.to_dictionary_with_id() for event in events]  # Add doc_id to each log
+	return render_template("index.html", events=event_dictionaries)
 
 
-@app.route('/logs/')
+@app.route('/events', methods=["GET"])
 def all_logs():
-	logs = database.all()  # Retrieve all logs from TinyDB
-	logs_with_ids = [{"doc_id": log.doc_id, **log} for log in logs]  # Add doc_id to each log
-	return render_template("index.html", logs=logs_with_ids)
+	successful, events = database.get_all()  # Retrieve all logs from TinyDB
+	if not successful:
+		return jsonify({"successful": False, "message": "Error retrieving the events"}), 404
+
+	event_dictionaries = [event.to_dictionary_with_id() for event in events]  # Add doc_id to each log
+	return jsonify({"successful": True, "message": "Success in retrieving the events", "events": event_dictionaries}), 200
 
 
 @app.route("/delete_log/<int:log_id>", methods=["DELETE"])
