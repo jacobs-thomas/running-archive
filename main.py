@@ -5,6 +5,7 @@ import datetime
 import flask
 from flask import Flask, jsonify, render_template, request
 import persistance
+from persistance import Event
 
 DATABASE_FILENAME: str = "running_logs.json"
 database: persistance.LogsDatabase = persistance.LogsDatabase(DATABASE_FILENAME)
@@ -44,6 +45,46 @@ def delete_log(log_id: int):
 		return jsonify({"message": "Log deleted successfully", "status": "success"}), 200
 
 	return jsonify({"message": "Log not found", "status": "error"}), 404
+
+
+@app.route("/events/add", methods=["POST"])
+def add_event_endpoint():
+	request_json = request.get_json()
+
+	if not request_json:
+		return jsonify({'successful': False, 'message': 'No data was provided'}), 400
+
+	title = request_json.get('title')
+	date = request_json.get('date')
+	time = request_json.get('time')
+	notes = request_json.get('notes')
+
+	successful, event = database.insert_event(title, date, time, notes)
+
+	# Return a success response
+	if not successful:
+		return jsonify({'successful': False, 'message': 'Error inserting event'}), 400
+
+	return jsonify({'successful': True, 'message': 'Event added successfully!', "event": event.to_dictionary_with_id()}), 200
+
+
+@app.route("/events/update", methods=["POST"])
+def update_event_endpoint():
+	request_json = request.get_json()
+
+	if not request_json:
+		return jsonify({"successful": False, "message": "No event data was provided"}), 400
+
+	event: Event = Event(request_json.get("id"), request_json.get("title"), request_json.get("date"), request_json.get("notes"))
+	successful = database.update()
+
+	if not successful:
+		return jsonify({"successful": False, "message": "Error updating the event data"}), 400
+
+	return jsonify({"successful": True, "message": "Successful in updating the event data", "event": event}), 200
+
+
+
 
 
 @app.route("/add_log", methods=["POST"])
